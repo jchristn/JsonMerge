@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>JsonMerge</name>
+    </assembly>
+    <members>
+        <member name="T:JsonMerge.JsonMerger">
+            <summary>
+            Simply and elegantly merge values into an existing JSON object.
+            </summary>
+        </member>
+        <member name="M:JsonMerge.JsonMerger.MergeJson(System.String,System.String)">
+            <summary>
+            Merges JSON objects together, with merge values overwriting input values for matching keys.
+            </summary>
+            <param name="inputJson">The input JSON object.</param>
+            <param name="mergeJson">The JSON object to merge into the input.  If the input already contains a key specified in mergeJson, it will be overwritten by the value in mergeJson.</param>
+            <returns>A JSON string based on inputJson with merged and overwritten values based on mergeJson.</returns>
+        </member>
+        <member name="M:JsonMerge.JsonMerger.MergeObjects(System.Text.Json.Nodes.JsonObject,System.Text.Json.Nodes.JsonObject)">
+            <summary>
+            Recursively merges properties from source into target.
+            </summary>
+            <param name="target">The target JSON object to merge into.</param>
+            <param name="source">The source JSON object to merge from.</param>
+        </member>
+        <member name="M:JsonMerge.JsonMerger.TryMergeJson(System.String,System.String,System.String@)">
+            <summary>
+            Attempts to merge JSON objects together, with merge values overwriting input values for matching keys.
+            Returns false if inputs are null, empty, or not valid JSON objects.
+            </summary>
+            <param name="inputJson">The input JSON object.</param>
+            <param name="mergeJson">The JSON object to merge into the input.</param>
+            <param name="result">The merged JSON string, or null if the merge failed.</param>
+            <returns>True if the merge succeeded, false otherwise.</returns>
+        </member>
+    </members>
+</doc>

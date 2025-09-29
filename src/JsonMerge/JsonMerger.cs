@@ -4,6 +4,9 @@
     using System.Text.Json;
     using System.Text.Json.Nodes;
 
+    /// <summary>
+    /// Simply and elegantly merge values into an existing JSON object.
+    /// </summary>
     public static class JsonMerger
     {
         /// <summary>

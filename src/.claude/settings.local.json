@@ -5,7 +5,10 @@
       "Bash(dotnet sln:*)",
       "Bash(dotnet add:*)",
       "Bash(dotnet build)",
-      "Bash(dotnet run:*)"
+      "Bash(dotnet run:*)",
+      "Read(//c/Code/Misc/JsonMerge/**)",
+      "WebFetch(domain:github.com)",
+      "Bash(dir)"
     ],
     "deny": [],
     "ask": []
