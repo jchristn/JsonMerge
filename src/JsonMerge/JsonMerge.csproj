@@ -7,7 +7,7 @@
 		<DocumentationFile>JsonMerge.xml</DocumentationFile>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Title>JsonMerge</Title>
-		<Version>1.1.0</Version>
+		<Version>1.1.1</Version>
 		<Authors>Joel Christner</Authors>
 		<Company>Joel Christner</Company>
 		<Description>Simply and elegantly merge values into an existing JSON object</Description>
@@ -18,7 +18,7 @@
 		<RepositoryUrl>https://github.com/jchristn/jsonmerge</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>json merge</PackageTags>
-		<PackageReleaseNotes>Duplicate property names rejected at any depth; JsonMergeOptions (MaxDepth, NullRemovesProperty, WriteIndented, UseRelaxedEscaping)</PackageReleaseNotes>
+		<PackageReleaseNotes>Dependency update: System.Text.Json 10.0.12</PackageReleaseNotes>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -44,7 +44,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="System.Text.Json" Version="10.0.1" />
+		<PackageReference Include="System.Text.Json" Version="10.0.12" />
 	</ItemGroup>
 
 </Project>

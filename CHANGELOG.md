@@ -2,6 +2,13 @@
 
 ## Current Version
 
+v1.1.1
+
+- Dependency update: System.Text.Json 10.0.1 -> 10.0.12
+- Test dependency updates: Touchstone 0.2.0, NUnit 5.0.0, NUnit3TestAdapter 6.3.0, NUnit.Analyzers 4.15.0, xunit.runner.visualstudio 4.0.0, Microsoft.NET.Test.Sdk 18.10.1, coverlet.collector 10.1.0
+
+## Previous Versions
+
 v1.1.0
 
 - Fix: duplicate property names are now rejected anywhere in either document.  Previously they were only detected in objects the merge touched, and were otherwise silently copied into the output with duplicates intact
@@ -13,8 +20,6 @@ v1.1.0
   - `UseRelaxedEscaping` (default false): write non-ASCII and HTML-sensitive characters without `\uXXXX` escaping
 - Input JSON is no longer parsed twice
 - Test infrastructure migrated to Touchstone (`Test.Shared`, `Test.Automated`, `Test.Xunit`, `Test.Nunit`) with expanded positive and negative coverage
-
-## Previous Versions
 
 v1.0.1
 

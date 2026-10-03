@@ -51,7 +51,7 @@ Install-Package JsonMerge
 Or add directly to your `.csproj` file:
 
 ```xml
-<PackageReference Include="JsonMerge" Version="1.1.0" />
+<PackageReference Include="JsonMerge" Version="1.1.1" />
 ```
 
 ## Quick Start
