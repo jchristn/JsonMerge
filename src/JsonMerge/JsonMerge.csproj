@@ -7,18 +7,18 @@
 		<DocumentationFile>JsonMerge.xml</DocumentationFile>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Title>JsonMerge</Title>
-		<Version>1.0.1</Version>
+		<Version>1.1.0</Version>
 		<Authors>Joel Christner</Authors>
 		<Company>Joel Christner</Company>
 		<Description>Simply and elegantly merge values into an existing JSON object</Description>
-		<Copyright>(c)2025 Joel Christner</Copyright>
+		<Copyright>(c)2025-2026 Joel Christner</Copyright>
 		<PackageProjectUrl>https://github.com/jchristn/jsonmerge</PackageProjectUrl>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/jchristn/jsonmerge</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>json merge</PackageTags>
-		<PackageReleaseNotes>Initial release</PackageReleaseNotes>
+		<PackageReleaseNotes>Duplicate property names rejected at any depth; JsonMergeOptions (MaxDepth, NullRemovesProperty, WriteIndented, UseRelaxedEscaping)</PackageReleaseNotes>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>

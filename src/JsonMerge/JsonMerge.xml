@@ -4,6 +4,56 @@
         <name>JsonMerge</name>
     </assembly>
     <members>
+        <member name="T:JsonMerge.JsonMergeOptions">
+            <summary>
+            Options controlling how JSON objects are merged and how the result is written.
+            </summary>
+        </member>
+        <member name="F:JsonMerge.JsonMergeOptions.DefaultMaxDepth">
+            <summary>
+            Default maximum nesting depth.
+            </summary>
+        </member>
+        <member name="F:JsonMerge.JsonMergeOptions.MaximumMaxDepth">
+            <summary>
+            Largest permitted value for <see cref="P:JsonMerge.JsonMergeOptions.MaxDepth"/>.
+            </summary>
+        </member>
+        <member name="P:JsonMerge.JsonMergeOptions.MaxDepth">
+            <summary>
+            Maximum nesting depth permitted when parsing either JSON document.
+            Default is 64.  Minimum is 1, maximum is 1000.
+            Documents nested more deeply cause a JsonException.
+            </summary>
+        </member>
+        <member name="P:JsonMerge.JsonMergeOptions.NullRemovesProperty">
+            <summary>
+            When true, a null value in the merge JSON removes the corresponding property from the result, and null values
+            inside newly added objects are omitted (JSON Merge Patch, RFC 7396, semantics).
+            When false, a null value in the merge JSON is written to the result as null.
+            Default is false.
+            </summary>
+        </member>
+        <member name="P:JsonMerge.JsonMergeOptions.WriteIndented">
+            <summary>
+            When true, the result is written with indentation and line breaks.
+            Default is false (compact output).
+            </summary>
+        </member>
+        <member name="P:JsonMerge.JsonMergeOptions.UseRelaxedEscaping">
+            <summary>
+            When true, non-ASCII characters and HTML-sensitive characters (such as &lt;, &gt;, &amp;, and ') are written as-is
+            rather than as \uXXXX escape sequences, using JavaScriptEncoder.UnsafeRelaxedJsonEscaping.
+            Characters outside the Basic Multilingual Plane (such as emoji) are still written as surrogate-pair escapes.
+            Do not enable this if the result will be embedded directly in HTML or script.
+            Default is false.
+            </summary>
+        </member>
+        <member name="M:JsonMerge.JsonMergeOptions.#ctor">
+            <summary>
+            Instantiate the object with default values.
+            </summary>
+        </member>
         <member name="T:JsonMerge.JsonMerger">
             <summary>
             Simply and elegantly merge values into an existing JSON object.
@@ -16,23 +66,74 @@
             <param name="inputJson">The input JSON object.</param>
             <param name="mergeJson">The JSON object to merge into the input.  If the input already contains a key specified in mergeJson, it will be overwritten by the value in mergeJson.</param>
             <returns>A JSON string based on inputJson with merged and overwritten values based on mergeJson.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown when inputJson or mergeJson is null or empty.</exception>
+            <exception cref="T:System.ArgumentException">Thrown when inputJson or mergeJson is not a JSON object, or contains duplicate property names.</exception>
+            <exception cref="T:System.Text.Json.JsonException">Thrown when inputJson or mergeJson is not valid JSON or exceeds the maximum depth.</exception>
         </member>
-        <member name="M:JsonMerge.JsonMerger.MergeObjects(System.Text.Json.Nodes.JsonObject,System.Text.Json.Nodes.JsonObject)">
+        <member name="M:JsonMerge.JsonMerger.MergeJson(System.String,System.String,JsonMerge.JsonMergeOptions)">
             <summary>
-            Recursively merges properties from source into target.
+            Merges JSON objects together, with merge values overwriting input values for matching keys.
             </summary>
-            <param name="target">The target JSON object to merge into.</param>
-            <param name="source">The source JSON object to merge from.</param>
+            <param name="inputJson">The input JSON object.</param>
+            <param name="mergeJson">The JSON object to merge into the input.  If the input already contains a key specified in mergeJson, it will be overwritten by the value in mergeJson.</param>
+            <param name="options">Merge options.  Null uses the defaults.</param>
+            <returns>A JSON string based on inputJson with merged and overwritten values based on mergeJson.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown when inputJson or mergeJson is null or empty.</exception>
+            <exception cref="T:System.ArgumentException">Thrown when inputJson or mergeJson is not a JSON object, or contains duplicate property names.</exception>
+            <exception cref="T:System.Text.Json.JsonException">Thrown when inputJson or mergeJson is not valid JSON or exceeds the maximum depth.</exception>
         </member>
         <member name="M:JsonMerge.JsonMerger.TryMergeJson(System.String,System.String,System.String@)">
             <summary>
             Attempts to merge JSON objects together, with merge values overwriting input values for matching keys.
-            Returns false if inputs are null, empty, or not valid JSON objects.
+            Returns false if inputs are null, empty, not valid JSON objects, or contain duplicate property names.
             </summary>
             <param name="inputJson">The input JSON object.</param>
             <param name="mergeJson">The JSON object to merge into the input.</param>
             <param name="result">The merged JSON string, or null if the merge failed.</param>
             <returns>True if the merge succeeded, false otherwise.</returns>
+        </member>
+        <member name="M:JsonMerge.JsonMerger.TryMergeJson(System.String,System.String,JsonMerge.JsonMergeOptions,System.String@)">
+            <summary>
+            Attempts to merge JSON objects together, with merge values overwriting input values for matching keys.
+            Returns false if inputs are null, empty, not valid JSON objects, or contain duplicate property names.
+            </summary>
+            <param name="inputJson">The input JSON object.</param>
+            <param name="mergeJson">The JSON object to merge into the input.</param>
+            <param name="options">Merge options.  Null uses the defaults.</param>
+            <param name="result">The merged JSON string, or null if the merge failed.</param>
+            <returns>True if the merge succeeded, false otherwise.</returns>
+        </member>
+        <member name="M:JsonMerge.JsonMerger.ParseObject(System.String,System.String,System.String,JsonMerge.JsonMergeOptions)">
+            <summary>
+            Parses a JSON object and validates that it contains no duplicate property names at any depth.
+            </summary>
+            <param name="json">The JSON text.</param>
+            <param name="paramName">Name of the parameter supplying the JSON.</param>
+            <param name="description">Description used in exception messages.</param>
+            <param name="options">Merge options.</param>
+            <returns>The parsed object.</returns>
+        </member>
+        <member name="M:JsonMerge.JsonMerger.Materialize(System.Text.Json.Nodes.JsonNode)">
+            <summary>
+            Walks every node so that lazily-parsed objects are materialized, which surfaces duplicate property names.
+            </summary>
+            <param name="node">The node to walk.</param>
+        </member>
+        <member name="M:JsonMerge.JsonMerger.MergeObjects(System.Text.Json.Nodes.JsonObject,System.Text.Json.Nodes.JsonObject,JsonMerge.JsonMergeOptions)">
+            <summary>
+            Recursively merges properties from source into target.
+            </summary>
+            <param name="target">The target JSON object to merge into.</param>
+            <param name="source">The source JSON object to merge from.</param>
+            <param name="options">Merge options.</param>
+        </member>
+        <member name="M:JsonMerge.JsonMerger.Serialize(System.Text.Json.Nodes.JsonObject,JsonMerge.JsonMergeOptions)">
+            <summary>
+            Serializes the result according to the output options.
+            </summary>
+            <param name="obj">The object to serialize.</param>
+            <param name="options">Merge options.</param>
+            <returns>JSON string.</returns>
         </member>
     </members>
 </doc>

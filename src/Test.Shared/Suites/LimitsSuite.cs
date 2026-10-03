@@ -73,12 +73,14 @@ namespace Test.Shared.Suites
                     }),
                     Case(Id, "DuplicateKeyInput", "Duplicate keys in inputJson are rejected with ArgumentException", () =>
                     {
-                        Check.Throws<ArgumentException>(() => JsonMerger.MergeJson("{\"a\":1,\"a\":2}", "{\"b\":1}"), "MergeJson");
+                        ArgumentException e = Check.ThrowsExactly<ArgumentException>(() => JsonMerger.MergeJson("{\"a\":1,\"a\":2}", "{\"b\":1}"), "MergeJson");
+                        Check.Equal("inputJson", e.ParamName, "ParamName");
                         VerifyTryFails("{\"a\":1,\"a\":2}", "{\"b\":1}");
                     }),
                     Case(Id, "DuplicateKeyMerge", "Duplicate keys in mergeJson are rejected with ArgumentException", () =>
                     {
-                        Check.Throws<ArgumentException>(() => JsonMerger.MergeJson("{\"b\":1}", "{\"a\":1,\"a\":2}"), "MergeJson");
+                        ArgumentException e = Check.ThrowsExactly<ArgumentException>(() => JsonMerger.MergeJson("{\"b\":1}", "{\"a\":1,\"a\":2}"), "MergeJson");
+                        Check.Equal("mergeJson", e.ParamName, "ParamName");
                         VerifyTryFails("{\"b\":1}", "{\"a\":1,\"a\":2}");
                     })
                 });

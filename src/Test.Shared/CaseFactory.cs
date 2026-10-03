@@ -74,6 +74,28 @@ namespace Test.Shared
         }
 
         /// <summary>
+        /// A case asserting that merging with the given options produces exactly the expected string through both MergeJson and TryMergeJson.
+        /// </summary>
+        /// <param name="suiteId">Suite id.</param>
+        /// <param name="caseId">Case id.</param>
+        /// <param name="displayName">Display name.</param>
+        /// <param name="options">Merge options.</param>
+        /// <param name="inputJson">Input JSON.</param>
+        /// <param name="mergeJson">Merge JSON.</param>
+        /// <param name="expectedJson">Exact expected output.</param>
+        /// <returns>Descriptor.</returns>
+        public static TestCaseDescriptor MergeWith(string suiteId, string caseId, string displayName, JsonMergeOptions options, string inputJson, string mergeJson, string expectedJson)
+        {
+            return Case(suiteId, caseId, displayName, () =>
+            {
+                Check.Equal(expectedJson, JsonMerger.MergeJson(inputJson, mergeJson, options), "MergeJson result");
+
+                Check.True(JsonMerger.TryMergeJson(inputJson, mergeJson, options, out string tryResult), "TryMergeJson returns true");
+                Check.Equal(expectedJson, tryResult, "TryMergeJson result");
+            });
+        }
+
+        /// <summary>
         /// A case asserting that merging produces exactly the expected string (property order and escaping included).
         /// </summary>
         /// <param name="suiteId">Suite id.</param>
@@ -161,12 +183,26 @@ namespace Test.Shared
         /// <param name="mergeJson">Merge JSON.</param>
         public static void VerifyTryFails(string? inputJson, string? mergeJson)
         {
+            VerifyTryFails(inputJson, mergeJson, null);
+        }
+
+        /// <summary>
+        /// Assert that TryMergeJson with options returns false, sets the result to null, and does not throw.
+        /// </summary>
+        /// <param name="inputJson">Input JSON.</param>
+        /// <param name="mergeJson">Merge JSON.</param>
+        /// <param name="options">Merge options, or null for the parameterless overload.</param>
+        public static void VerifyTryFails(string? inputJson, string? mergeJson, JsonMergeOptions? options)
+        {
             bool success;
             string result;
 
             try
             {
-                success = JsonMerger.TryMergeJson(inputJson!, mergeJson!, out result);
+                if (options == null)
+                    success = JsonMerger.TryMergeJson(inputJson!, mergeJson!, out result);
+                else
+                    success = JsonMerger.TryMergeJson(inputJson!, mergeJson!, options, out result);
             }
             catch (Exception e)
             {

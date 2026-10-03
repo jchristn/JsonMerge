@@ -26,6 +26,8 @@ namespace Test.Shared
                     MalformedJsonSuite.Create(),
                     TryMergeSuite.Create(),
                     LimitsSuite.Create(),
+                    DuplicateKeySuite.Create(),
+                    OptionsSuite.Create(),
                     BehaviorSuite.Create()
                 };
             }

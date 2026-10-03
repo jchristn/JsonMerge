@@ -30,7 +30,9 @@ Perfect for configuration management, API response merging, template systems, an
 - **Flexible API**: Choose between exception-throwing or Try pattern methods
 - **Smart Overwriting**: Merge values override existing values when keys match
 - **Type Preservation**: Handles all JSON types (strings, numbers, booleans, null, objects, arrays)
-- **Multi-Framework**: Supports .NET 8.0, .NET Standard 2.0, and .NET Standard 2.1
+- **Configurable**: Optional `JsonMergeOptions` for maximum depth, null-removes-property (RFC 7396 style), indented output, and relaxed escaping
+- **Strict Validation**: Duplicate property names are rejected at any depth
+- **Multi-Framework**: Supports .NET 8.0, .NET 10.0, .NET Standard 2.0, and .NET Standard 2.1
 
 ## Installation
 
@@ -49,7 +51,7 @@ Install-Package JsonMerge
 Or add directly to your `.csproj` file:
 
 ```xml
-<PackageReference Include="JsonMerge" Version="1.0.0" />
+<PackageReference Include="JsonMerge" Version="1.1.0" />
 ```
 
 ## Quick Start
@@ -90,8 +92,8 @@ Merges two JSON objects, with merge values overwriting input values for matching
 
 **Throws:**
 - `ArgumentNullException` - If either parameter is null or empty
-- `ArgumentException` - If either parameter is not a valid JSON object
-- `JsonException` - If JSON parsing fails
+- `ArgumentException` - If either parameter is not a JSON object, or contains duplicate property names (`ParamName` identifies which)
+- `JsonException` - If JSON parsing fails or the document exceeds the maximum depth
 
 ### `TryMergeJson(string inputJson, string mergeJson, out string result)`
 
@@ -103,6 +105,44 @@ Attempts to merge JSON objects with safe error handling.
 - `result` - Output parameter containing the merged JSON string, or null if merge fails
 
 **Returns:** `true` if merge succeeded, `false` otherwise
+
+### Overloads with `JsonMergeOptions`
+
+```csharp
+string MergeJson(string inputJson, string mergeJson, JsonMergeOptions options)
+bool TryMergeJson(string inputJson, string mergeJson, JsonMergeOptions options, out string result)
+```
+
+Passing `null` for `options` uses the defaults, which behave exactly like the overloads without options.
+
+### `JsonMergeOptions`
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `MaxDepth` | `64` | Maximum nesting depth permitted when parsing either document (1 to 1000; other values throw `ArgumentOutOfRangeException`). Deeper documents throw `JsonException`. |
+| `NullRemovesProperty` | `false` | When `true`, a `null` merge value removes the property, and `null` values inside newly added objects are omitted (JSON Merge Patch, RFC 7396). Nulls inside arrays are kept. |
+| `WriteIndented` | `false` | When `true`, the result is indented. |
+| `UseRelaxedEscaping` | `false` | When `true`, non-ASCII and HTML-sensitive characters (`<`, `>`, `&`, `'`, `+`) are written as-is instead of as `\uXXXX` escapes. Characters outside the Basic Multilingual Plane (such as emoji) remain escaped. Do not embed relaxed output directly in HTML or script. |
+
+```csharp
+JsonMergeOptions options = new JsonMergeOptions
+{
+    NullRemovesProperty = true,
+    WriteIndented = true
+};
+
+string result = JsonMerger.MergeJson(
+    "{\"name\":\"svc\",\"debug\":true,\"limits\":{\"cpu\":2}}",
+    "{\"debug\":null,\"limits\":{\"memory\":512}}",
+    options);
+// {
+//   "name": "svc",
+//   "limits": {
+//     "cpu": 2,
+//     "memory": 512
+//   }
+// }
+```
 
 ## Use Cases
 
@@ -159,7 +199,7 @@ else
 - **Nested object merging**: Objects are recursively merged at all depths
 - **Type changes**: A property can change type (e.g., number → string)
 - **All JSON types**: Strings, numbers, booleans, null, objects, and arrays
-- **Deep structures**: Nesting up to 64 levels (the `System.Text.Json` default maximum depth)
+- **Deep structures**: Nesting up to 64 levels by default, configurable up to 1000 via `JsonMergeOptions.MaxDepth`
 - **Special characters**: Unicode, whitespace, and escape sequences
 
 ### What Will Fail ✗
@@ -168,8 +208,8 @@ else
 - **Invalid JSON syntax**: Malformed JSON throws exceptions
 - **Array inputs**: Root elements must be objects `{}`, not arrays `[]`
 - **Primitive inputs**: Root elements must be objects, not primitives (`123`, `"string"`, etc.)
-- **Excessive nesting**: JSON nested deeper than 64 levels throws `JsonException`
-- **Duplicate keys**: An object containing the same key twice throws `ArgumentException`
+- **Excessive nesting**: JSON nested deeper than `MaxDepth` (default 64) throws `JsonException`
+- **Duplicate keys**: An object anywhere in either document containing the same key twice throws `ArgumentException`
 
 ### Important Constraints
 
@@ -183,6 +223,25 @@ string merge = "{\"tags\":[\"python\",\"django\"]}";
 string result = JsonMerger.MergeJson(input, merge);
 // Result: {"tags":["python","django"]} - NOT ["javascript","nodejs","python","django"]
 ```
+
+#### Null Values
+
+By default a `null` merge value is written as `null`; it does not remove the property. Set `JsonMergeOptions.NullRemovesProperty` to remove it instead:
+
+```csharp
+string input = "{\"a\":1,\"b\":2}";
+string merge = "{\"a\":null}";
+
+JsonMerger.MergeJson(input, merge);
+// Result: {"a":null,"b":2}
+
+JsonMerger.MergeJson(input, merge, new JsonMergeOptions { NullRemovesProperty = true });
+// Result: {"b":2}
+```
+
+#### Output Escaping
+
+By default, non-ASCII and HTML-sensitive characters are written as `\uXXXX` escapes (for example `中文` becomes `\u4E2D\u6587`). The output is equivalent JSON. Set `JsonMergeOptions.UseRelaxedEscaping` to write them as-is.
 
 #### Empty Objects
 
@@ -224,7 +283,7 @@ string result2 = JsonMerger.MergeJson(input2, merge2);
 
 | Target Framework | Version |
 |------------------|---------|
-| .NET             | 8.0+    |
+| .NET             | 8.0, 10.0 |
 | .NET Standard    | 2.0+    |
 | .NET Standard    | 2.1+    |
 

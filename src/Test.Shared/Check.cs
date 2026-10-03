@@ -2,6 +2,7 @@ namespace Test.Shared
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.Json;
     using System.Text.Json.Nodes;
 
     /// <summary>
@@ -68,6 +69,32 @@ namespace Test.Shared
         }
 
         /// <summary>
+        /// Assert that a string contains a fragment (ordinal, case-insensitive comparison).
+        /// </summary>
+        /// <param name="haystack">String to search.</param>
+        /// <param name="needle">Fragment that must appear.</param>
+        /// <param name="message">Message describing the string.</param>
+        /// <exception cref="AssertionFailedException">Thrown when the fragment is missing.</exception>
+        public static void Contains(string? haystack, string needle, string message)
+        {
+            if (haystack == null || haystack.IndexOf(needle, StringComparison.OrdinalIgnoreCase) < 0)
+                throw new AssertionFailedException(message + ": expected [" + Format(haystack) + "] to contain [" + needle + "]");
+        }
+
+        /// <summary>
+        /// Assert that a string does not contain a fragment (ordinal comparison).
+        /// </summary>
+        /// <param name="haystack">String to search.</param>
+        /// <param name="needle">Fragment that must not appear.</param>
+        /// <param name="message">Message describing the string.</param>
+        /// <exception cref="AssertionFailedException">Thrown when the fragment is present.</exception>
+        public static void DoesNotContain(string? haystack, string needle, string message)
+        {
+            if (haystack != null && haystack.IndexOf(needle, StringComparison.Ordinal) >= 0)
+                throw new AssertionFailedException(message + ": expected [" + haystack + "] not to contain [" + needle + "]");
+        }
+
+        /// <summary>
         /// Assert that two JSON documents are semantically equal (property order and escaping are ignored).
         /// </summary>
         /// <param name="expectedJson">Expected JSON.</param>
@@ -76,6 +103,19 @@ namespace Test.Shared
         /// <exception cref="AssertionFailedException">Thrown when the documents differ or either cannot be parsed.</exception>
         public static void JsonEqual(string expectedJson, string? actualJson, string message)
         {
+            JsonEqualDeep(expectedJson, actualJson, 64, message);
+        }
+
+        /// <summary>
+        /// Assert that two JSON documents are semantically equal, parsing with the given maximum depth.
+        /// </summary>
+        /// <param name="expectedJson">Expected JSON.</param>
+        /// <param name="actualJson">Actual JSON.</param>
+        /// <param name="maxDepth">Maximum depth used to parse both documents.</param>
+        /// <param name="message">Message describing the comparison.</param>
+        /// <exception cref="AssertionFailedException">Thrown when the documents differ or either cannot be parsed.</exception>
+        public static void JsonEqualDeep(string expectedJson, string? actualJson, int maxDepth, string message)
+        {
             if (actualJson == null) throw new AssertionFailedException(message + ": expected [" + expectedJson + "] but got null");
 
             JsonNode? expected;
@@ -83,8 +123,9 @@ namespace Test.Shared
 
             try
             {
-                expected = JsonNode.Parse(expectedJson);
-                actual = JsonNode.Parse(actualJson);
+                JsonDocumentOptions options = new JsonDocumentOptions { MaxDepth = maxDepth };
+                expected = JsonNode.Parse(expectedJson, null, options);
+                actual = JsonNode.Parse(actualJson, null, options);
             }
             catch (Exception e)
             {
